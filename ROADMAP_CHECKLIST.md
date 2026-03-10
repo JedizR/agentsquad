@@ -10,10 +10,10 @@
 **Goal:** Infrastructure is set up, all 5 agents can respond.
 
 ### Prerequisites
-- [ ] Node.js >= 18 installed (`node --version`)
-- [ ] GNU Make installed (macOS: `brew install make`)
-- [ ] shellcheck installed (`brew install shellcheck`)
-- [ ] 1 Google account ready (free tier)
+- [x] Node.js >= 18 installed (`node --version`) — v21.7.3
+- [x] GNU Make installed (macOS: `brew install make`) — GNU Make 3.81
+- [x] shellcheck installed (`brew install shellcheck`) — v0.11.0
+- [x] 1 Google account ready (free tier) — GEMINI_API_KEY configured
 
 ### Repository Setup
 - [x] `git init` in agentsquad/
@@ -21,34 +21,34 @@
 - [x] Create `ROADMAP_CHECKLIST.md`
 
 ### Global Directory
-- [ ] Create `~/.agent-team/` directory structure
-  - [ ] `~/.agent-team/scripts/`
-  - [ ] `~/.agent-team/skills/{tech-lead,backend-engineer,frontend-engineer,qa-engineer,devops-engineer,business-consultant}/{,references}`
-- [ ] Create `~/.agent-team/.gitignore` (protects `.env.team`)
+- [x] Create `~/.agent-team/` directory structure
+  - [x] `~/.agent-team/scripts/`
+  - [x] `~/.agent-team/skills/{tech-lead,backend-engineer,frontend-engineer,qa-engineer,devops-engineer,business-consultant}/{,references}`
+- [x] Create `~/.agent-team/.gitignore` (protects `.env.team`)
 
 ### Credentials
-- [ ] Create `~/.agent-team/.env.team` template
-- [ ] `chmod 600 ~/.agent-team/.env.team`
-- [ ] Create `.env.team.example` (safe-to-commit template)
+- [x] Create `~/.agent-team/.env.team` template
+- [x] `chmod 600 ~/.agent-team/.env.team`
+- [x] Create `.env.team.example` (safe-to-commit template)
 
 ### Scripts
-- [ ] Write `scripts/setup.sh` (OS detection, Node check, gemini-cli install, dir creation, key setup, symlinks)
-- [ ] Write `scripts/health-check.sh` (verify all 5 agents respond)
-- [ ] Write `scripts/gemini-call.sh` (retry wrapper + strip_filler integration + escalation detector)
-- [ ] Write `scripts/strip-filler.sh` (LLM output cleaner — Strategy 1: code blocks, Strategy 2: preamble strip)
-- [ ] Write `scripts/rotate-key.sh` (swap to backup key on 429)
-- [ ] Write `scripts/migrate.sh` (rsync to new machine, exclude .env.team)
+- [x] Write `scripts/setup.sh` (OS detection, Node check, gemini-cli install, dir creation, key setup, symlinks)
+- [x] Write `scripts/health-check.sh` (verify all 5 agents respond — bash 3.2 compatible)
+- [x] Write `scripts/gemini-call.sh` (retry wrapper + strip_filler integration + escalation detector)
+- [x] Write `scripts/strip-filler.sh` (LLM output cleaner — Strategy 1: code blocks, Strategy 2: preamble strip)
+- [x] Write `scripts/rotate-key.sh` (swap to backup key on 429)
+- [x] Write `scripts/migrate.sh` (rsync to new machine, exclude .env.team)
 
 ### Testing
-- [ ] Test: `shellcheck` passes (zero errors, zero warnings) on ALL `.sh` files
-- [ ] Test: `setup.sh` runs without errors on macOS
-- [ ] Test: `health-check.sh` runs (shows "Key not set" since no real key yet)
-- [ ] Test: `gemini-call.sh` sources without error
-- [ ] Test: `strip-filler.sh` correctly strips preamble from test input
+- [x] Test: `shellcheck` passes (zero errors, zero warnings) on ALL `.sh` files
+- [x] Test: `setup.sh` runs without errors on macOS
+- [x] Test: `health-check.sh` — all 5 agents respond OK ✅
+- [x] Test: `gemini-call.sh` sources without error, call_gemini() defined
+- [x] Test: `strip-filler.sh` correctly strips preamble and code-block content
 
 ### Commit
-- [ ] `git add` all Phase 1 files (exclude `.env*`)
-- [ ] Commit: `phase(1): foundation — agent-team dir, credentials, scripts`
+- [x] `git add` all Phase 1 files (exclude `.env*`)
+- [x] Commit: `phase(1): foundation — agent-team dir, credentials, scripts` ✅ 7bb6fdd
 
 ---
 
