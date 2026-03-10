@@ -38,9 +38,19 @@ Reply with your answers and I'll generate everything."
 2. `TEAM.md` — using TEAM.md.template
 3. `Makefile` — using Makefile.template
 4. `.gemini/settings.json` — using settings.json.template
-5. `agent-output/.gitkeep`, `api-contracts/.gitkeep`, `research/.gitkeep`
-6. `.gitignore` entry: `agent-output/` and `.env*` (add if .gitignore exists)
-7. Symlink or copy `.gemini/skills/` from `~/.agent-team/skills/`
+5. Directory scaffolding:
+   - `agent-output/.gitkeep` — gitignored; all Gemini output lands here
+   - `api-contracts/README.md` — copy from `~/agentsquad/api-contracts/README.md` if available, else write a short placeholder explaining that Claude writes contracts here before dispatching agents
+   - `api-contracts/auth.example.md` — copy from `~/agentsquad/api-contracts/auth.example.md` if available
+   - `research/README.md` — copy from `~/agentsquad/research/README.md` if available, else write a short placeholder explaining the Consultant writes research here
+   - If TypeScript project detected: `src/types/shared/.gitkeep`, `src/types/api/.gitkeep`, `src/types/ui/.gitkeep`
+6. `.gitignore` entries — add if `.gitignore` exists, create it if not:
+   ```
+   agent-output/
+   .env*
+   !.env.example
+   ```
+7. Symlink `.gemini/skills/` from `~/.agent-team/skills/`
 
 ### Step 4: Verify setup
 Run in bash:
@@ -58,7 +68,10 @@ After generating all files, summarize:
 - TEAM.md (team charter)
 - Makefile (agent dispatch commands)
 - .gemini/settings.json (model config)
-- agent-output/, api-contracts/, research/ directories
+- agent-output/ (gitignored — Gemini output lands here)
+- api-contracts/ with README + auth example (Claude writes contracts here first)
+- research/ with README (Consultant writes research here)
+- src/types/shared|api|ui/ (if TypeScript project)
 - Skills linked into .gemini/skills/
 
 Health check: [PASS / FAIL — list which agents responded]
