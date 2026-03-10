@@ -34,13 +34,17 @@ strip_filler() {
   # Strategy 1: extract content inside ALL code blocks and concatenate.
   # v1.3 fix: use `next` on closing fence so multiple blocks are all captured.
   # Explanation text between blocks is silently dropped (in_block=0 during those lines).
+  # Uses awk -v to pass the fence pattern to avoid shell backtick command substitution.
   FENCE='```'
   if grep -q "^${FENCE}" "$input_file"; then
-    awk "/^${FENCE}/{
-      if (!in_block) { in_block=1; next }
-      else           { in_block=0; next }
-    }
-    in_block { print }" "$input_file" > "$output_file"
+    awk -v fence="${FENCE}" '
+      BEGIN { in_block = 0 }
+      $0 ~ ("^" fence) {
+        if (!in_block) { in_block = 1; next }
+        else           { in_block = 0; next }
+      }
+      in_block { print }
+    ' "$input_file" > "$output_file"
   else
     # Strategy 2: strip known preamble patterns from the top of the file
     grep -v -iE \
