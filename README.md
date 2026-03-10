@@ -31,31 +31,76 @@ One free Gemini API key. 250 req/day on Flash, 1,000 on Flash-Lite. Your Claude 
 
 ---
 
-## Quick Start
+## Simplest Setup
 
-**One-command install:**
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/JedizR/agentsquad/main/install.sh)
 ```
 
-**Or clone manually:**
+Then open `~/.agent-team/.env.team`, add your Gemini API key, and run `~/.agent-team/scripts/health-check.sh`. Done.
+
+Get a free key at [aistudio.google.com](https://aistudio.google.com).
+
+---
+
+## If you are an AI Agent
+
+> **For users:** Tell Claude Code — _"Set up AgentSquad from https://github.com/JedizR/agentsquad"_ — and it will follow these steps automatically.
+
+If you are Claude Code or another AI agent reading this, here is the full setup sequence. Run each step in order and report back after each one.
+
+**Step 1 — Install**
 ```bash
-git clone https://github.com/JedizR/agentsquad && cd agentsquad
-bash scripts/setup.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/JedizR/agentsquad/main/install.sh)
 ```
 
-Then:
+**Step 2 — Ask the user for their Gemini API key**
+
+Tell the user: _"Please paste your Gemini API key. Get one free at https://aistudio.google.com → Get API Key."_
+
+Then write it into the credentials file:
 ```bash
-# Add your Gemini API key (free at aistudio.google.com)
+# Replace YOUR_KEY_HERE with the key the user provides
+sed -i.bak 's/your_key_here/YOUR_KEY_HERE/' ~/.agent-team/.env.team
+source ~/.agent-team/.env.team
+```
+
+**Step 3 — Verify**
+```bash
+~/.agent-team/scripts/health-check.sh
+```
+All 5 agents should show `✅ Responding`. If any show rate-limited, wait one minute and retry.
+
+**Step 4 — Bootstrap the current project**
+```bash
+# Inside Claude Code, run:
+/init-agent-team
+```
+This generates `CLAUDE.md`, `TEAM.md`, `Makefile`, and `.gemini/settings.json` in the current directory.
+
+**Step 5 — Confirm to the user**
+
+Tell the user: _"AgentSquad is ready. Try `make team-health` to confirm all agents are up, then `make backend TASK='...'` to dispatch your first agent."_
+
+---
+
+## Quick Setup (Manually)
+
+```bash
+# 1. Clone and run setup
+git clone https://github.com/JedizR/agentsquad && cd agentsquad
+bash scripts/setup.sh
+
+# 2. Add your Gemini API key (free at aistudio.google.com)
 nano ~/.agent-team/.env.team
 
-# Load credentials
+# 3. Load credentials
 source ~/.agent-team/.env.team
 
-# Verify all 5 agents respond
+# 4. Verify all 5 agents respond
 ~/.agent-team/scripts/health-check.sh
 
-# Bootstrap onto any project (run inside Claude Code)
+# 5. Bootstrap onto any project (run inside Claude Code)
 /init-agent-team
 ```
 
