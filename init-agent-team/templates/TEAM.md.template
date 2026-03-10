@@ -1,0 +1,99 @@
+# {{PROJECT_NAME}} — Team Charter
+> AgentSquad v{{AGENTSQUAD_VERSION}} · {{DATE}}
+
+This document describes how the team operates. It is for human contributors
+and AI agents alike.
+
+---
+
+## The Team
+
+### Tech Founder (You + Claude Code)
+**Owns:** Everything. The final say on all decisions.
+
+The human founder drives strategy, product direction, and architecture.
+Claude Code is the technical co-founder — architecting systems, reviewing all
+agent output, and making the calls that require judgment.
+
+**You decide:** What to build, how the system is designed, what gets shipped.
+
+### Backend Engineer (Gemini Flash)
+**Owns:** `/src/api/`, `/src/services/`, `/src/db/`, `/src/middleware/`
+
+Implements REST/GraphQL endpoints, database schemas, and business logic.
+Always works from an api-contract.md authored by Claude before starting.
+Returns output in the structured format defined in SKILL.md.
+
+### Frontend Engineer (Gemini Flash)
+**Owns:** `/src/components/`, `/src/pages/`, `/src/hooks/`, `/src/stores/`
+
+Builds UI components and pages. Mobile-first. Accessibility included by default.
+Always handles all 4 states: loading, error, empty, success.
+
+### QA Engineer (Gemini Flash-Lite)
+**Owns:** `/tests/`, `/__tests__/`
+
+Writes unit, integration, component, and E2E tests. Files structured bug
+reports when issues are found. Uses mocks for unimplemented endpoints rather
+than skipping tests.
+
+### DevOps Engineer (Gemini Flash-Lite)
+**Owns:** `/.github/workflows/`, `/docker/`, `/infra/`, `Makefile`
+
+Containerizes the app, sets up CI/CD, configures deployments. Annotates
+every new environment variable with `[REQUIRES MANUAL STEP]` so nothing
+is ever set up silently.
+
+### Business Consultant (Gemini Pro + Google Search)
+**Owns:** `/research/`
+
+Researches markets, competitors, pricing, and regulations using real-time
+Google Search. Provides evidence-backed recommendations. Used at project start
+and major decision points, not on a per-feature basis.
+
+---
+
+## Working Norms
+
+### Communication
+- Claude writes task prompts for each agent — the clearer the prompt, the better the output
+- All agent output goes to `agent-output/` (gitignored) — review before integrating
+- Escalations (`[ESCALATE TO CLAUDE]`) are resolved by the human + Claude before continuing
+
+### Code Ownership
+- No agent modifies another agent's domain without Claude coordinating the handoff
+- `/src/types/shared/` is Claude-only territory — no agent touches it directly
+- `api-contracts/` is Claude-only territory — agents only READ these, never write them
+
+### Quality Gates
+- No code is integrated without Claude review
+- shellcheck passes on all .sh files (automated in CI)
+- All 4 UI states handled before a component is considered done
+- No new npm/pip packages without flagging as an escalation first
+
+### Security
+- All API keys stored only in `~/.agent-team/.env.team` — never in code
+- Auth and payment flows always go through Claude for security review
+- No production database migration runs without explicit Claude approval
+
+---
+
+## Getting Started (New Team Member / New Machine)
+
+```bash
+# 1. Set up the global agent team
+bash ~/.agent-team/scripts/setup.sh   # Or: git clone + install.sh
+
+# 2. Add your API key
+echo 'GEMINI_API_KEY=your_key_here' >> ~/.agent-team/.env.team
+
+# 3. Load credentials
+source ~/.agent-team/.env.team
+
+# 4. Verify everything is working
+make team-health
+
+# 5. Start building
+claude  # Opens Claude Code in this project
+# Then in Claude: /init-agent-team (if not already initialized)
+```
