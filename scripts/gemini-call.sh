@@ -14,7 +14,7 @@
 # Load strip_filler if available
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -f "$_SCRIPT_DIR/strip-filler.sh" ]]; then
-  # shellcheck source=scripts/strip-filler.sh
+  # shellcheck disable=SC1091  # dynamic path — resolved at runtime
   source "$_SCRIPT_DIR/strip-filler.sh"
 fi
 
