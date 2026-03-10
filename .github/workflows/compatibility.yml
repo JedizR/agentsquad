@@ -1,0 +1,56 @@
+name: Gemini CLI Compatibility
+
+on:
+  schedule:
+    # Every Monday at 09:00 UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+jobs:
+  compatibility:
+    name: Check Gemini CLI version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Gemini CLI
+        run: npm install -g @google/gemini-cli
+
+      - name: Record Gemini CLI version
+        id: gemini_version
+        run: |
+          VERSION=$(gemini --version 2>&1 || echo "unknown")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Gemini CLI version: $VERSION"
+
+      - name: Check --approval-mode flag exists
+        run: |
+          # If --approval-mode=yolo is not recognized, this will surface a warning
+          echo "Checking --approval-mode flag..."
+          gemini --help 2>&1 | grep -i "approval" || \
+            echo "⚠️  WARNING: --approval-mode flag not found in gemini --help"
+
+      - name: Run shellcheck on scripts
+        run: |
+          sudo apt-get install -y shellcheck
+          find scripts/ -name "*.sh" -print0 | \
+            xargs -0 shellcheck --severity=warning
+
+      - name: Report results
+        run: |
+          echo "========================================="
+          echo "Compatibility Report"
+          echo "========================================="
+          echo "Date: $(date -u)"
+          echo "Gemini CLI: ${{ steps.gemini_version.outputs.version }}"
+          echo "ShellCheck: $(shellcheck --version | head -2 | tail -1)"
+          echo "Node.js: $(node --version)"
+          echo ""
+          echo "If any step above failed, open an issue with label 'compatibility'."
