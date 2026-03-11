@@ -12,13 +12,13 @@ How AgentSquad is structured, how control flows, and where files live.
 │                                                                 │
 │  You ──► Claude Code (Tech Lead)                                │
 │               │                                                 │
-│               ├──► make backend  ──► Gemini Flash ──┐          │
-│               ├──► make frontend ──► Gemini Flash ──┤          │
+│               ├──► make backend  ──► Gemini Flash ──┐           │
+│               ├──► make frontend ──► Gemini Flash ──┤           │
 │               ├──► make qa       ──► Gemini Lite  ──┤──► agent-output/
-│               ├──► make devops   ──► Gemini Lite  ──┤          │
-│               └──► make consult  ──► Gemini Pro   ──┘          │
+│               ├──► make devops   ──► Gemini Lite  ──┤           │
+│               └──► make consult  ──► Gemini Pro   ──┘           │
 │                        │                                        │
-│                        └──► Google AI API (single key)         │
+│                        └──► Google AI API (single key)          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
