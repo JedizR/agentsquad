@@ -4,14 +4,17 @@
 # Ownership: init-agent-team generates this scaffold.
 # DevOps Engineer owns it after initial generation.
 #
-# v1.2 KEY STRATEGY: All agents share GEMINI_API_KEY by default.
-# Per-agent keys (GEMINI_KEY_BACKEND etc.) override when set in .env.team.
-# To add per-agent isolation: uncomment keys in ~/.agent-team/.env.team — no Makefile changes.
+# KEY STRATEGY: All agents share GEMINI_API_KEY by default.
+#   Per-agent keys (GEMINI_KEY_BACKEND etc.) override when set in .env.team.
+# MODEL STRATEGY: No -m flag (broken in gemini-cli 0.32.1+).
+#   Model set via GEMINI_MODEL env var. Default: gemini-3-flash (20 RPD free).
+#   Use *-lite targets for Gemma tier (14,400 RPD free).
 #
 # Requires: GNU Make (on macOS: brew install make, then use gmake)
 # Usage:
-#   make backend TASK="implement the user registration endpoint"
-#   make team-health
+#   make backend  TASK="implement the user registration endpoint"
+#   make backend-lite  TASK="scaffold CRUD boilerplate"  # Gemma, 14,400 RPD
+#   make team-health                                     # 0 RPD credential check
 
 -include ~/.agent-team/.env.team
 export
@@ -26,44 +29,116 @@ QA_KEY       := $(or $(GEMINI_KEY_QA),$(GEMINI_API_KEY))
 DEVOPS_KEY   := $(or $(GEMINI_KEY_DEVOPS),$(GEMINI_API_KEY))
 CONSULT_KEY  := $(or $(GEMINI_KEY_CONSULTANT),$(GEMINI_API_KEY))
 
-.PHONY: backend frontend qa devops consult team-health clean-output help
+# Model defaults (override in .env.team or environment)
+BACKEND_MODEL  ?= gemini-3-flash
+FRONTEND_MODEL ?= gemini-3-flash
+QA_MODEL       ?= gemini-3-flash
+DEVOPS_MODEL   ?= gemini-3-flash
+CONSULT_MODEL  ?= gemini-3-flash
+GEMMA_MODEL    ?= gemma-3-27b-it
 
-backend: ## Dispatch task to Backend Engineer (gemini-2.5-flash)
+.PHONY: backend frontend qa devops consult \
+        backend-lite frontend-lite qa-lite \
+        team-health team-health-live clean-output help
+
+backend: ## Dispatch Backend Engineer (gemini-3-flash, 20 RPD)
 	@mkdir -p $(OUTPUT_DIR)
-	@GEMINI_API_KEY=$(BACKEND_KEY) \
-	  gemini -m gemini-2.5-flash --prompt "$(TASK)" $(GEMINI_FLAGS) \
-	  | tee $(OUTPUT_DIR)/backend-$(shell date +%s).md
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(BACKEND_KEY) GEMINI_MODEL=$(BACKEND_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/backend-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
 
-frontend: ## Dispatch task to Frontend Engineer (gemini-2.5-flash)
+frontend: ## Dispatch Frontend Engineer (gemini-3-flash, 20 RPD)
 	@mkdir -p $(OUTPUT_DIR)
-	@GEMINI_API_KEY=$(FRONTEND_KEY) \
-	  gemini -m gemini-2.5-flash --prompt "$(TASK)" $(GEMINI_FLAGS) \
-	  | tee $(OUTPUT_DIR)/frontend-$(shell date +%s).md
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(FRONTEND_KEY) GEMINI_MODEL=$(FRONTEND_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/frontend-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
 
-qa: ## Dispatch task to QA Engineer (gemini-2.5-flash-lite)
+qa: ## Dispatch QA Engineer (gemini-3-flash, 20 RPD)
 	@mkdir -p $(OUTPUT_DIR)
-	@GEMINI_API_KEY=$(QA_KEY) \
-	  gemini -m gemini-2.5-flash-lite --prompt "$(TASK)" $(GEMINI_FLAGS) \
-	  | tee $(OUTPUT_DIR)/qa-$(shell date +%s).md
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(QA_KEY) GEMINI_MODEL=$(QA_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/qa-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
 
-devops: ## Dispatch task to DevOps Engineer (gemini-2.5-flash-lite)
+devops: ## Dispatch DevOps Engineer (gemini-3-flash, 20 RPD)
 	@mkdir -p $(OUTPUT_DIR)
-	@GEMINI_API_KEY=$(DEVOPS_KEY) \
-	  gemini -m gemini-2.5-flash-lite --prompt "$(TASK)" $(GEMINI_FLAGS) \
-	  | tee $(OUTPUT_DIR)/devops-$(shell date +%s).md
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(DEVOPS_KEY) GEMINI_MODEL=$(DEVOPS_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/devops-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
 
-consult: ## Dispatch research task to Business Consultant (web-search + Google)
+consult: ## Dispatch Business Consultant (gemini-3-flash + Google Search)
 	@mkdir -p $(OUTPUT_DIR)
-	@GEMINI_API_KEY=$(CONSULT_KEY) \
-	  gemini -m web-search --prompt "$(TASK)" $(GEMINI_FLAGS) \
-	  | tee $(OUTPUT_DIR)/consult-$(shell date +%s).md
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(CONSULT_KEY) GEMINI_MODEL=$(CONSULT_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/consult-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
 
-team-health: ## Verify all agents are responding
-	@~/.agent-team/scripts/health-check.sh
+backend-lite: ## Backend on Gemma tier (gemma-3-27b-it, 14,400 RPD)
+	@mkdir -p $(OUTPUT_DIR)
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(BACKEND_KEY) GEMINI_MODEL=$(GEMMA_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/backend-lite-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
 
-clean-output: ## Remove all generated output files from agent-output/
+frontend-lite: ## Frontend on Gemma tier (gemma-3-27b-it, 14,400 RPD)
+	@mkdir -p $(OUTPUT_DIR)
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(FRONTEND_KEY) GEMINI_MODEL=$(GEMMA_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/frontend-lite-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
+
+qa-lite: ## QA on Gemma tier (gemma-3-27b-it, 14,400 RPD)
+	@mkdir -p $(OUTPUT_DIR)
+	@{ \
+	  _tmp=$$(mktemp /tmp/agentsquad-XXXXXX); \
+	  printf '%s' "$(TASK)" > "$$_tmp"; \
+	  GEMINI_API_KEY=$(QA_KEY) GEMINI_MODEL=$(GEMMA_MODEL) \
+	    gemini --prompt "$$(cat $$_tmp)" $(GEMINI_FLAGS) \
+	    | tee $(OUTPUT_DIR)/qa-lite-$$(date +%s).md; \
+	  rm -f "$$_tmp"; \
+	}
+
+team-health: ## Check credentials are configured (0 RPD)
+	@~/.agent-team/scripts/health-check.sh --cheap
+
+team-health-live: ## Ping all agents via API (5 RPD via gemma-3-1b-it)
+	@~/.agent-team/scripts/health-check.sh --live
+
+clean-output: ## Remove all generated files from agent-output/
 	@rm -f $(OUTPUT_DIR)/*.ts $(OUTPUT_DIR)/*.tsx $(OUTPUT_DIR)/*.md \
-	  $(OUTPUT_DIR)/*.sql $(OUTPUT_DIR)/*.json $(OUTPUT_DIR)/*.sh
+	  $(OUTPUT_DIR)/*.sql $(OUTPUT_DIR)/*.json $(OUTPUT_DIR)/*.sh \
+	  $(OUTPUT_DIR)/*.py $(OUTPUT_DIR)/*.go
 	@echo "agent-output/ cleaned"
 
 help: ## Show this help message
